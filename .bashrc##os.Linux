@@ -1,0 +1,66 @@
+# Quit when not run interactively
+[ -z "${PS1:-}" ] && return
+
+# .bashrc
+# echo 'In bashrc'
+LS_OPTIONS='--color=auto'
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+	. /etc/bashrc
+fi
+
+# Load aliases
+if [ -f ~/configuration_files/.bash_aliases ]; then
+    . ~/configuration_files/.bash_aliases
+fi
+# Load bash setting for all servers
+if [ -f ~/configuration_files/.bash_all ]; then
+    . ~/configuration_files/.bash_all
+fi
+if [ -f ~/configuration_files/.bash_`hostname` ]; then
+    . ~/configuration_files/.bash_`hostname`
+fi
+
+# User specific aliases and functions
+module load slurm
+export MODULEPATH=/cm/shared/modulefiles/SHARED:$MODULEPATH
+#export MODULEPATH=/cm/shared/modulefiles/WUR/PRI:$MODULEPATH
+#ml use /shared/eb_modules/all
+
+#rainbow
+export PATH=$PATH:/home/WUR/haars001/.local/bin
+
+# Create eternal bash history
+if [ ! -d ~/.bash_eternal_history/ ]; then
+  mkdir ~/.bash_eternal_history/
+fi
+#echo $PROMPT_COMMAND
+#PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND ; }"'echo $$ $USER $HOSTNAME "$(history 1)" >> ~/.bash_eternal_history/.bash_eternal_history_`date +%Y_%V`'
+
+# Wrap conda initialize in a function, so we do not start it up every time, but only when we need it
+cdi ()
+{
+__conda_setup="$('/home/WUR/haars001/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)";
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup";
+else
+    if [ -f "/home/WUR/haars001/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "/home/WUR/haars001/miniconda3/etc/profile.d/conda.sh";
+    else
+        export PATH="/home/WUR/haars001/miniconda3/bin:$PATH";
+    fi;
+fi;
+unset __conda_setup
+}
+
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+# Add crontab
+if $( hostname | grep -q login0)
+then
+    crontab /home/WUR/haars001/bin/crontab.in
+fi
+# Run backup
+([ -f ~/bin/restic_backup.sh ] && nohup ~/bin/restic_backup.sh 2>/dev/null &)
+
