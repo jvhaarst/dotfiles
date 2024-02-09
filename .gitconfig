@@ -1,0 +1,18 @@
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	required = true
+	process = git-lfs filter-process
+[user]
+	name = Jan van Haarst
+	email = jan@vanhaarst.net
+[core]
+	excludesfile = /Users/jvhaarst/.gitignore_global
+[gui]
+	editor = /opt/homebrew/bin/code
+[credential "https://git.wur.nl"]
+	username = haars001
+[credential]
+	helper = cache --timeout=86400
+[init]
+	defaultBranch = main
